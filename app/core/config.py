@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     whatsapp_dry_run: bool = True
 
     # --- Business rules ----------------------------------------------------
+    # Customer-facing brand name. Used to sign every outbound draft, so it
+    # must match the storefront the customer actually lands on.
+    business_name: str = "MassageVIP Riyadh"
     business_city: str = "Riyadh"
     business_timezone: str = "Asia/Riyadh"
     business_country_code: str = "+966"
@@ -138,6 +141,12 @@ class Settings(BaseSettings):
             problems.append("ADMIN_API_KEY is missing/placeholder")
         if self.is_sqlite:
             problems.append("DATABASE_URL still points at SQLite (use Supabase Postgres)")
+        host = self.public_base_url.lower()
+        if any(bad in host for bad in ("127.0.0.1", "localhost", "0.0.0.0", "example")):
+            problems.append(
+                "PUBLIC_BASE_URL is still a local/placeholder host, so every "
+                "marketing tracking link would be broken"
+            )
         if problems:
             raise RuntimeError(
                 "Refusing to start in production with insecure config: "

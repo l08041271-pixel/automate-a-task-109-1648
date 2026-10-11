@@ -9,12 +9,16 @@ Design rules (do not break these):
 """
 from __future__ import annotations
 
+from app.core.config import settings
 from app.db.enums import LeadClassification
 
-_SIGNATURE = "— MassageVIP Riyadh"
+
+def _signature() -> str:
+    """Sign drafts with the configured brand so they match the storefront."""
+    return f"— {settings.business_name}"
 
 ASK_FOR_INFO = (
-    "Thank you for contacting MassageVIP Riyadh. 🙏\n\n"
+    "Thank you for contacting {brand}. 🙏\n\n"
     "To check availability for you, could you share:\n"
     "{missing}\n\n"
     "As soon as we have this, our team will verify availability and confirm your "
@@ -22,13 +26,13 @@ ASK_FOR_INFO = (
 )
 
 RECEIVED_FULL = (
-    "Thank you for contacting MassageVIP Riyadh. 🙏\n\n"
+    "Thank you for contacting {brand}. 🙏\n\n"
     "We have received your request. Our team will verify availability for your "
     "preferred time and confirm with you shortly."
 )
 
 NEEDS_HUMAN = (
-    "Thank you for contacting MassageVIP Riyadh. 🙏\n\n"
+    "Thank you for contacting {brand}. 🙏\n\n"
     "Your request needs a quick check by our team. Someone will reply here shortly "
     "to confirm the details with you."
 )
@@ -50,12 +54,12 @@ def draft_reply(
     if opted_out:
         return None  # we never message someone who opted out
     if needs_human:
-        return f"{NEEDS_HUMAN}\n\n{_SIGNATURE}"
+        return f"{NEEDS_HUMAN.format(brand=settings.business_name)}\n\n{_signature()}"
     missing = [m for m in (missing_info or []) if m]
     if missing:
         bullet_list = "\n".join(f"• {item}" for item in missing[:3])
-        return f"{ASK_FOR_INFO.format(missing=bullet_list)}\n\n{_SIGNATURE}"
-    return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"
+        return f"{ASK_FOR_INFO.format(missing=bullet_list, brand=settings.business_name)}\n\n{_signature()}"
+    return f"{RECEIVED_FULL.format(brand=settings.business_name)}\n\n{_signature()}"
 
 
 # --------------------------------------------------------------------------- #
@@ -89,18 +93,18 @@ def followup_body(job_type_value: str, *, payload: dict | None = None,
     """Build the body for a follow-up job. Returns plain text (no promises)."""
     payload = payload or {}
     if job_type_value == "UNANSWERED_INQUIRY":
-        return f"{FOLLOWUP_UNANSWERED}\n\n{_SIGNATURE}"
+        return f"{FOLLOWUP_UNANSWERED}\n\n{_signature()}"
     if job_type_value == "INCOMPLETE_BOOKING":
         missing = [m for m in (missing_info or []) if m]
         if missing:
             bullet_list = "\n".join(f"• {item}" for item in missing[:3])
-            return f"{ASK_FOR_INFO.format(missing=bullet_list)}\n\n{_SIGNATURE}"
-        return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"
+            return f"{ASK_FOR_INFO.format(missing=bullet_list, brand=settings.business_name)}\n\n{_signature()}"
+        return f"{RECEIVED_FULL.format(brand=settings.business_name)}\n\n{_signature()}"
     if job_type_value == "APPOINTMENT_REMINDER":
         when = payload.get("scheduled_at_text") or "your scheduled time"
-        return f"{FOLLOWUP_REMINDER.format(when=when)}\n\n{_SIGNATURE}"
+        return f"{FOLLOWUP_REMINDER.format(when=when)}\n\n{_signature()}"
     if job_type_value == "POST_APPOINTMENT_FEEDBACK":
-        return f"{FOLLOWUP_FEEDBACK}\n\n{_SIGNATURE}"
+        return f"{FOLLOWUP_FEEDBACK}\n\n{_signature()}"
     if job_type_value == "REQUESTED_LATER":
-        return f"{FOLLOWUP_LATER}\n\n{_SIGNATURE}"
-    return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"
+        return f"{FOLLOWUP_LATER}\n\n{_signature()}"
+    return f"{RECEIVED_FULL.format(brand=settings.business_name)}\n\n{_signature()}"

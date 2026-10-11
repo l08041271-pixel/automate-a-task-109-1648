@@ -213,7 +213,8 @@ real `.env`.
 | `FEEDBACK_DELAY_HOURS` | no | Delay before asking for feedback (default 2) |
 | `BUSINESS_CITY` / `BUSINESS_TIMEZONE` / `BUSINESS_COUNTRY_CODE` | no | Riyadh / Asia/Riyadh / +966 |
 | `HOT_SERVICE_KEYWORDS` | no | Core services (English + Arabic) used for scoring |
-| `PUBLIC_BASE_URL` | no | Used to build UTM tracking links |
+| `PUBLIC_BASE_URL` | yes in prod | Canonical **customer-facing** base URL used to build every UTM tracking link. Production refuses to boot with localhost/placeholder. |
+| `BUSINESS_NAME` | no | Customer-facing brand. Signs every WhatsApp and follow-up draft, so it must match the storefront |
 
 ---
 
@@ -463,6 +464,9 @@ and the WhatsApp access token. Store those in a password manager. Losing the
 | `429 Too Many Requests` | Rate limit hit | Wait for `Retry-After`, or raise `RATE_LIMIT_PER_MINUTE` |
 | Migration says *checksum drift* | An applied `.sql` file was edited | Add a new migration instead of editing an applied one |
 | Render service is slow on first request | Free tier sleeps | Expected; use `/health` to warm it before a demo |
+| `Refusing to start in production...PUBLIC_BASE_URL` | Still localhost/placeholder | Set it to your real primary storefront domain |
+| Drafts are signed with the wrong brand | `BUSINESS_NAME` not updated | Set it to match the storefront the customer sees |
+| Campaign links point at localhost | `PUBLIC_BASE_URL` left at its dev value | Set the production env var; see section 5 |
 | `pip` SSL errors on a restricted network | Corporate/proxy CA | `pip install --cert /path/to/ca.pem -r requirements.txt` |
 | `psycopg` build fails on Termux | Missing build tools | `pkg install binutils`; SQLite works without `psycopg` |
 
