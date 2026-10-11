@@ -73,6 +73,20 @@ class Settings(BaseSettings):
     business_city: str = "Riyadh"
     business_timezone: str = "Asia/Riyadh"
     business_country_code: str = "+966"
+    # --- Follow-up automation (Phase 5) ------------------------------------
+    # Minimum hours between two automated messages to the same conversation.
+    followup_cooldown_hours: int = 24
+    # Hard cap on automated messages per contact per 24h.
+    followup_max_per_day: int = 2
+    # Require explicit GRANTED consent before any automated follow-up.
+    followup_require_consent: bool = True
+    # How long to wait before chasing an unanswered inquiry.
+    unanswered_inquiry_hours: int = 4
+    # Send the reminder this many hours before a confirmed appointment.
+    appointment_reminder_hours_before: int = 24
+    # How long after a completed appointment to ask for feedback.
+    feedback_delay_hours: int = 2
+
     hot_service_keywords: str = (
         "massage,spa,home service,booking,appointment,"
         "مساج,سبا,حجز,موعد,خدمة منزلية"

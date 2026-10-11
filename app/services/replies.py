@@ -56,3 +56,51 @@ def draft_reply(
         bullet_list = "\n".join(f"• {item}" for item in missing[:3])
         return f"{ASK_FOR_INFO.format(missing=bullet_list)}\n\n{_SIGNATURE}"
     return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"
+
+
+# --------------------------------------------------------------------------- #
+# Follow-up templates (Phase 5). Same honesty rules apply: no prices, no
+# availability promises, no invented details. Every message invites a reply.
+# --------------------------------------------------------------------------- #
+FOLLOWUP_UNANSWERED = (
+    "Hello 👋 We wanted to make sure your earlier message didn't get lost.\n\n"
+    "Would you still like to arrange an appointment? Just reply here and our team "
+    "will check availability for you."
+)
+
+FOLLOWUP_REMINDER = (
+    "Reminder: your appointment is booked for {when}.\n\n"
+    "If you need to change or cancel it, reply here and our team will help."
+)
+
+FOLLOWUP_FEEDBACK = (
+    "Thank you for visiting us. We'd love to know how your experience was — "
+    "simply reply with a rating from 1 to 5. Your feedback helps us improve."
+)
+
+FOLLOWUP_LATER = (
+    "Hello 👋 You asked us to follow up about arranging an appointment. "
+    "Would now be a good time? Our team will check availability once you confirm."
+)
+
+
+def followup_body(job_type_value: str, *, payload: dict | None = None,
+                  missing_info: list[str] | None = None) -> str:
+    """Build the body for a follow-up job. Returns plain text (no promises)."""
+    payload = payload or {}
+    if job_type_value == "UNANSWERED_INQUIRY":
+        return f"{FOLLOWUP_UNANSWERED}\n\n{_SIGNATURE}"
+    if job_type_value == "INCOMPLETE_BOOKING":
+        missing = [m for m in (missing_info or []) if m]
+        if missing:
+            bullet_list = "\n".join(f"• {item}" for item in missing[:3])
+            return f"{ASK_FOR_INFO.format(missing=bullet_list)}\n\n{_SIGNATURE}"
+        return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"
+    if job_type_value == "APPOINTMENT_REMINDER":
+        when = payload.get("scheduled_at_text") or "your scheduled time"
+        return f"{FOLLOWUP_REMINDER.format(when=when)}\n\n{_SIGNATURE}"
+    if job_type_value == "POST_APPOINTMENT_FEEDBACK":
+        return f"{FOLLOWUP_FEEDBACK}\n\n{_SIGNATURE}"
+    if job_type_value == "REQUESTED_LATER":
+        return f"{FOLLOWUP_LATER}\n\n{_SIGNATURE}"
+    return f"{RECEIVED_FULL}\n\n{_SIGNATURE}"

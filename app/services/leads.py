@@ -208,6 +208,10 @@ def create_lead(
         return existing, False
 
     apply_score(db, lead, actor=actor)
+    # Local import avoids a module cycle (followups -> leads).
+    from app.services import followups
+
+    followups.schedule_initial_jobs(db, lead)
     record_event(
         db, lead.id, "created", to_value=lead.stage.value, actor=actor,
         metadata={"source": lead.source.value, "classification": (
