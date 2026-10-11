@@ -1,0 +1,8 @@
+# Development / CI-only extras:  pip install -r requirements-dev.txt
+-r requirements.txt
+
+# Real PostgreSQL grammar parser used to validate the SQL migrations.
+pglast==8.5
+
+# Linting
+ruff==0.8.4

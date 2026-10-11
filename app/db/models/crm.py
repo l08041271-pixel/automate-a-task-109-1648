@@ -38,11 +38,16 @@ JSONType = JSON().with_variant(JSONB(), "postgresql")
 
 
 def _enum_col(py_enum: type[_py_enum.Enum], name: str) -> Enum:
-    """Portable enum column: VARCHAR + CHECK everywhere (no PG native type)."""
+    """Portable enum column: VARCHAR + CHECK everywhere (no PG native type).
+
+    ``create_constraint=True`` is required because SQLAlchemy 2.x defaults it
+    to False, which would silently drop the database-level CHECK guards.
+    """
     return Enum(
         py_enum,
         name=name,
         native_enum=False,
+        create_constraint=True,
         length=40,
         validate_strings=True,
         values_callable=lambda e: [m.value for m in e],
