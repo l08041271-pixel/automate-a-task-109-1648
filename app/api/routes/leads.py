@@ -45,7 +45,10 @@ def create_lead(
         lead, created = leads_service.create_lead(db, payload)
     except SpamDetected:
         response.status_code = status.HTTP_202_ACCEPTED
-        raise HTTPException(status_code=status.HTTP_202_ACCEPTED, detail="Received")
+        # Generic acknowledgement: never tell a bot that it was detected.
+        raise HTTPException(
+            status_code=status.HTTP_202_ACCEPTED, detail="Received"
+        ) from None
     db.commit()
     db.refresh(lead)
     if not created:

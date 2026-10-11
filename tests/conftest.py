@@ -20,6 +20,9 @@ os.environ["SECRET_KEY"] = "test-secret-key-that-is-definitely-long-enough-12345
 os.environ["RATE_LIMIT_PER_MINUTE"] = "100000"  # avoid flakiness
 os.environ["BUSINESS_CITY"] = "Riyadh"
 os.environ["BCRYPT_ROUNDS"] = "4"  # keep password hashing fast in tests
+os.environ["WHATSAPP_APP_SECRET"] = "test-app-secret"
+os.environ["WHATSAPP_VERIFY_TOKEN"] = "test-verify-token"
+os.environ["WHATSAPP_DRY_RUN"] = "true"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

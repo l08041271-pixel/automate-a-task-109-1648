@@ -90,7 +90,7 @@ class Contact(UUIDMixin, TimestampMixin, Base):
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     identity_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
-    leads: Mapped[list["Lead"]] = relationship(back_populates="contact")
+    leads: Mapped[list[Lead]] = relationship(back_populates="contact")
 
     __table_args__ = (
         UniqueConstraint("wa_id", name="uq_contacts_wa_id"),
@@ -126,7 +126,7 @@ class Campaign(UUIDMixin, TimestampMixin, Base):
     currency: Mapped[str] = mapped_column(String(3), default="SAR", nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    leads: Mapped[list["Lead"]] = relationship(back_populates="campaign")
+    leads: Mapped[list[Lead]] = relationship(back_populates="campaign")
 
     __table_args__ = (
         UniqueConstraint("utm_campaign", "channel", name="uq_campaigns_utm_channel"),
@@ -192,7 +192,7 @@ class Lead(UUIDMixin, TimestampMixin, Base):
 
     contact: Mapped[Contact | None] = relationship(back_populates="leads")
     campaign: Mapped[Campaign | None] = relationship(back_populates="leads")
-    events: Mapped[list["LeadEvent"]] = relationship(
+    events: Mapped[list[LeadEvent]] = relationship(
         back_populates="lead", cascade="all, delete-orphan"
     )
 

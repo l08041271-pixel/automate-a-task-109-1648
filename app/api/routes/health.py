@@ -1,7 +1,7 @@
 """Health / readiness endpoints used by uptime checks and GitHub Actions."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
@@ -35,7 +35,7 @@ def health(db: Session = Depends(get_db)) -> dict:
         "environment": settings.environment,
         "database": "ok" if ok else "unavailable",
         "database_error": error,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 

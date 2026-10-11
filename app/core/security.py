@@ -4,7 +4,7 @@ from __future__ import annotations
 import hmac
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
@@ -62,7 +62,7 @@ def create_access_token(
     expires_minutes: int | None = None,
     extra: dict | None = None,
 ) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     exp = now + timedelta(minutes=expires_minutes or settings.access_token_expire_minutes)
     payload = {
         "sub": subject,

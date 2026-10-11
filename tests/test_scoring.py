@@ -1,7 +1,7 @@
 """Unit tests for the lead qualification engine (pure functions, no DB)."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.db.enums import BookingStatus, LeadClassification, PipelineStage
 from app.services.lead_scoring import (
@@ -12,7 +12,7 @@ from app.services.lead_scoring import (
     score_lead,
 )
 
-_T = datetime(2030, 1, 1, 18, 0, tzinfo=timezone.utc)
+_T = datetime(2030, 1, 1, 18, 0, tzinfo=UTC)
 
 
 def _classify(score: int) -> LeadClassification:

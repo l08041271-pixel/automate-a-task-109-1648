@@ -1,7 +1,7 @@
 """User account service: creation, lookup, authentication."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -55,7 +55,7 @@ def authenticate(db: Session, email: str, password: str) -> User | None:
         return None
     if not verify_password(password, user.hashed_password):
         return None
-    user.last_login_at = datetime.now(timezone.utc)
+    user.last_login_at = datetime.now(UTC)
     db.flush()
     return user
 

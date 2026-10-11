@@ -46,7 +46,7 @@ class Conversation(UUIDMixin, TimestampMixin, Base):
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     message_count: Mapped[int] = mapped_column(default=0, nullable=False)
 
-    messages: Mapped[list["Message"]] = relationship(
+    messages: Mapped[list[Message]] = relationship(
         back_populates="conversation", cascade="all, delete-orphan"
     )
 

@@ -98,8 +98,9 @@ def test_password_is_never_returned_or_stored_in_plaintext(client, owner_user):
 
 
 def test_audit_log_records_login_attempts(client, owner_user):
-    from app.db.models import AuditLog
     from sqlalchemy import select
+
+    from app.db.models import AuditLog
 
     _login(client, OWNER["email"], OWNER["password"])
     _login(client, OWNER["email"], "wrong-password-1")

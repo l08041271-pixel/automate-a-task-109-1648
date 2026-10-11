@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class DuplicateLeadError(Exception):
@@ -325,7 +325,7 @@ def update_lead(
 
     for field, value in changes.items():
         if field == "phone":
-            setattr(lead, "phone_e164", value)
+            lead.phone_e164 = value
             touched_scoring = True
             continue
         if getattr(lead, field, None) != value:
