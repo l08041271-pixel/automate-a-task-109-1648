@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0f1115" />
+  <title>MassageVIP Riyadh — CEO Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot" aria-hidden="true"></span>
+      <div>
+        <h1>MassageVIP Riyadh</h1>
+        <p class="sub">Business growth dashboard</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <select id="range" aria-label="Reporting period">
+        <option value="1">Today</option>
+        <option value="7">7 days</option>
+        <option value="30" selected>30 days</option>
+        <option value="90">90 days</option>
+      </select>
+      <button id="refresh" class="btn">Refresh</button>
+      <button id="logout" class="btn ghost" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Login -->
+    <section id="login-view" class="card login">
+      <h2>Sign in</h2>
+      <p class="muted">Use your dashboard account, or paste a service API key.</p>
+      <form id="login-form">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" placeholder="owner@massagevip.sa" />
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" />
+        <button class="btn primary" type="submit">Sign in</button>
+      </form>
+      <details>
+        <summary>Use an API key instead</summary>
+        <form id="key-form">
+          <label for="apikey">X-API-Key</label>
+          <input id="apikey" type="password" placeholder="paste key" />
+          <button class="btn" type="submit">Use key</button>
+        </form>
+      </details>
+      <p id="login-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dash-view" hidden>
+      <p id="dash-error" class="error" role="alert" hidden></p>
+      <div id="kpis" class="kpi-grid"></div>
+
+      <div class="card">
+        <h2>Conversion</h2>
+        <div id="conversion"></div>
+      </div>
+
+      <div class="card">
+        <h2>Lead sources</h2>
+        <div id="sources"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pipeline</h2>
+        <div id="pipeline"></div>
+      </div>
+
+      <div class="card">
+        <h2>Campaign performance</h2>
+        <div id="campaigns"></div>
+      </div>
+
+      <div class="card">
+        <h2>Follow-ups</h2>
+        <div id="followups"></div>
+      </div>
+
+      <div class="card">
+        <h2>Money</h2>
+        <div id="money"></div>
+      </div>
+
+      <div class="card">
+        <h2>System health</h2>
+        <div id="health"></div>
+      </div>
+
+      <div class="card muted-card">
+        <h2>How to read these numbers</h2>
+        <div id="notes"></div>
+      </div>
+
+      <footer class="foot">
+        <span id="generated"></span>
+      </footer>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

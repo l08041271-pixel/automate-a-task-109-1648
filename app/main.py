@@ -4,6 +4,7 @@ Run (dev):   uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 """
 from __future__ import annotations
 
+import pathlib
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -11,6 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.core.config import settings
@@ -87,7 +89,15 @@ def create_app() -> FastAPI:
         )
 
     # --- Routes -----------------------------------------------------------
-    from app.api.routes import auth, bookings, followups, health, leads, whatsapp
+    from app.api.routes import (
+    analytics,
+    auth,
+    bookings,
+    followups,
+    health,
+    leads,
+    whatsapp,
+)
 
     app.include_router(health.router)  # /health is unprefixed by design
     app.include_router(leads.router, prefix=settings.api_v1_prefix)
@@ -95,6 +105,16 @@ def create_app() -> FastAPI:
     app.include_router(whatsapp.router, prefix=settings.api_v1_prefix)
     app.include_router(bookings.router, prefix=settings.api_v1_prefix)
     app.include_router(followups.router, prefix=settings.api_v1_prefix)
+    app.include_router(analytics.router, prefix=settings.api_v1_prefix)
+
+    # --- Static, mobile-first CEO dashboard (no build step) -------------
+    dashboard_dir = pathlib.Path(__file__).resolve().parents[1] / "static" / "dashboard"
+    if dashboard_dir.is_dir():
+        app.mount(
+            "/dashboard",
+            StaticFiles(directory=str(dashboard_dir), html=True),
+            name="dashboard",
+        )
 
     @app.get("/", include_in_schema=False)
     def root() -> dict:
