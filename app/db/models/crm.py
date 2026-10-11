@@ -8,7 +8,6 @@ from datetime import datetime
 
 from sqlalchemy import (
     CheckConstraint,
-    DateTime,
     Enum,
     ForeignKey,
     Index,
@@ -24,7 +23,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
-from app.db.base import Base, TimestampMixin, UUIDMixin
+from app.db.base import Base, TimestampMixin, UTCDateTime, UUIDMixin
 from app.db.enums import (
     BookingStatus,
     ConsentStatus,
@@ -83,11 +82,11 @@ class Contact(UUIDMixin, TimestampMixin, Base):
         _enum_col(ConsentStatus, "consent_status"), default=ConsentStatus.UNKNOWN, nullable=False
     )
     consent_source: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    opted_out_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    opted_out_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     opt_out_reason: Mapped[str | None] = mapped_column(String(300), nullable=True)
 
-    first_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    first_seen_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    last_seen_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     identity_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     leads: Mapped[list[Lead]] = relationship(back_populates="contact")
@@ -119,8 +118,8 @@ class Campaign(UUIDMixin, TimestampMixin, Base):
     utm_term: Mapped[str | None] = mapped_column(String(160), nullable=True)
     landing_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(String(30), default="DRAFT", nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    ended_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     budget_amount: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     spend_amount: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), default="SAR", nullable=False)
@@ -157,7 +156,7 @@ class Lead(UUIDMixin, TimestampMixin, Base):
     initial_inquiry: Mapped[str | None] = mapped_column(Text, nullable=True)
     service_interest: Mapped[str | None] = mapped_column(String(200), nullable=True)
     preferred_time_text: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    preferred_time_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    preferred_time_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     location_text: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     stage: Mapped[PipelineStage] = mapped_column(
@@ -178,7 +177,7 @@ class Lead(UUIDMixin, TimestampMixin, Base):
     score_explanation: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
     missing_info: Mapped[list | None] = mapped_column(JSONType, nullable=True)
     recommended_action: Mapped[str | None] = mapped_column(Text, nullable=True)
-    scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    scored_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
 
     # Attribution (denormalised for direct-form leads with no Campaign row yet).
     utm_source: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -188,7 +187,7 @@ class Lead(UUIDMixin, TimestampMixin, Base):
     utm_term: Mapped[str | None] = mapped_column(String(160), nullable=True)
 
     dedupe_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    last_activity_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_activity_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
 
     contact: Mapped[Contact | None] = relationship(back_populates="leads")
     campaign: Mapped[Campaign | None] = relationship(back_populates="leads")
@@ -222,7 +221,7 @@ class LeadEvent(UUIDMixin, Base):
     actor: Mapped[str] = mapped_column(String(120), default="system", nullable=False)
     event_metadata: Mapped[dict | None] = mapped_column("metadata", JSONType, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        UTCDateTime, server_default=func.now(), nullable=False
     )
 
     lead: Mapped[Lead] = relationship(back_populates="events")

@@ -113,3 +113,36 @@ def test_booking_for_unknown_lead_is_404(client, admin_headers):
         headers=admin_headers,
     )
     assert resp.status_code == 404
+
+
+def test_confirmation_survives_a_datetime_round_trip(client, admin_headers):
+    """Regression: SQLite returns naive datetimes, which used to make the
+    reminder scheduling raise TypeError during confirmation."""
+    from sqlalchemy import select
+
+    from app.db.enums import JobType
+    from app.db.models import FollowUpJob
+    from app.db.session import SessionLocal
+
+    lead = _lead(client)
+    # Walk the pipeline first so the lead is not sitting in NEW.
+    client.patch(f"{BASE}/{lead['id']}", json={"stage": "CONTACTED"}, headers=admin_headers)
+
+    when = (datetime.now(UTC) + timedelta(days=5)).isoformat()
+    booking = client.post(
+        BOOKINGS,
+        json={"lead_id": lead["id"], "requested_time_at": when},
+        headers=admin_headers,
+    ).json()
+
+    resp = client.patch(
+        f"{BOOKINGS}/{booking['id']}",
+        json={"status": "CONFIRMED", "verified": True},
+        headers=admin_headers,
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["scheduled_at"] is not None
+
+    with SessionLocal() as db:
+        jobs = db.execute(select(FollowUpJob)).scalars().all()
+    assert any(j.job_type == JobType.APPOINTMENT_REMINDER for j in jobs)

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint and test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      # CI-only values. No real secrets are ever used in this workflow.
+      ENVIRONMENT: development
+      DATABASE_URL: sqlite:///./ci.db
+      SECRET_KEY: ci-secret-key-not-used-anywhere-real-0123456789
+      ADMIN_API_KEY: ci-admin-key
+      BCRYPT_ROUNDS: "4"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check app tests scripts
+
+      - name: Verify migrations are valid PostgreSQL and match the models
+        run: python -m pytest tests/test_migrations.py -q
+
+      - name: Run test suite
+        run: python -m pytest -q --maxfail=1
+
+      - name: Smoke-test the app boots and serves /health
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from app.main import app
+          with TestClient(app) as c:
+              r = c.get('/health')
+              assert r.status_code == 200, r.text
+              assert r.json()['status'] == 'ok'
+              assert c.get('/dashboard/').status_code == 200
+          print('smoke test passed')
+          PY

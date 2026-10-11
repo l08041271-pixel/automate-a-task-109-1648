@@ -1,0 +1,39 @@
+name: Follow-up queue
+
+# Processes due follow-up jobs and DRAFTS messages for staff review.
+# It never sends anything to a customer.
+#
+# Requires repository secret DATABASE_URL (Supabase pooled connection string).
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # hourly
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install runtime dependencies
+        run: pip install -r requirements.txt
+
+      - name: Process due follow-ups (drafts only)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: production
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          FOLLOWUP_REQUIRE_CONSENT: "true"
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret is not configured."
+            exit 1
+          fi
+          python scripts/run_followups.py

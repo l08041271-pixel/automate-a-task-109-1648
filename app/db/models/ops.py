@@ -6,7 +6,6 @@ from datetime import datetime
 
 from sqlalchemy import (
     CheckConstraint,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -19,7 +18,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, TimestampMixin, UUIDMixin
+from app.db.base import Base, TimestampMixin, UTCDateTime, UUIDMixin
 from app.db.enums import BookingStatus, JobStatus, JobType, RunStatus
 from app.db.models.crm import JSONType, _enum_col
 
@@ -37,8 +36,8 @@ class Booking(UUIDMixin, TimestampMixin, Base):
     location_text: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     # Requested = what the customer asked for. Scheduled = what staff confirmed.
-    requested_time_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    requested_time_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    scheduled_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     status: Mapped[BookingStatus] = mapped_column(
@@ -52,7 +51,7 @@ class Booking(UUIDMixin, TimestampMixin, Base):
     # A booking is only CONFIRMED once a human verifies it.
     verified: Mapped[bool] = mapped_column(default=False, nullable=False)
     verified_by: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    verified_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     verification_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     __table_args__ = (
@@ -79,7 +78,7 @@ class FollowUpJob(UUIDMixin, TimestampMixin, Base):
     status: Mapped[JobStatus] = mapped_column(
         _enum_col(JobStatus, "job_status"), default=JobStatus.SCHEDULED, nullable=False
     )
-    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    due_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)
     attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     max_attempts: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -102,9 +101,9 @@ class AutomationRun(UUIDMixin, Base):
         _enum_col(RunStatus, "run_status"), default=RunStatus.RUNNING, nullable=False
     )
     started_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        UTCDateTime, server_default=func.now(), nullable=False
     )
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     metrics: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
     recommendations: Mapped[list | None] = mapped_column(JSONType, nullable=True)
@@ -128,7 +127,7 @@ class AuditLog(UUIDMixin, Base):
     ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(300), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        UTCDateTime, server_default=func.now(), nullable=False
     )
 
     __table_args__ = (

@@ -6,7 +6,6 @@ from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
-    DateTime,
     ForeignKey,
     Index,
     String,
@@ -17,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, TimestampMixin, UUIDMixin
+from app.db.base import Base, TimestampMixin, UTCDateTime, UUIDMixin
 from app.db.enums import (
     ConversationStatus,
     MessageDirection,
@@ -43,7 +42,7 @@ class Conversation(UUIDMixin, TimestampMixin, Base):
         nullable=False,
     )
     assigned_to: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_message_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     message_count: Mapped[int] = mapped_column(default=0, nullable=False)
 
     messages: Mapped[list[Message]] = relationship(
@@ -78,7 +77,7 @@ class Message(UUIDMixin, Base):
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     raw_payload: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        UTCDateTime, server_default=func.now(), nullable=False
     )
 
     conversation: Mapped[Conversation] = relationship(back_populates="messages")

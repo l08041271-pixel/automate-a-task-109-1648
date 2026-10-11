@@ -1,0 +1,39 @@
+name: Apply database migrations
+
+# Manual only, deliberately: schema changes should never be automatic.
+# Requires repository secret DATABASE_URL (Supabase pooled connection string).
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type APPLY to run the migrations
+        required: true
+
+jobs:
+  migrate:
+    if: github.event.inputs.confirm == 'APPLY'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install runtime dependencies
+        run: pip install -r requirements.txt
+
+      - name: Show what would run
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/apply_migrations.py --dry-run
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: production
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+        run: python scripts/apply_migrations.py

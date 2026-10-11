@@ -1,0 +1,32 @@
+name: Health check
+
+# Pings the deployed API every 30 minutes. Fails loudly (and GitHub emails the
+# repo owner) if the service stops responding. Requires the repo variable
+# DEPLOY_BASE_URL, e.g. https://massagevip-api.onrender.com
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /health
+        env:
+          BASE_URL: ${{ vars.DEPLOY_BASE_URL }}
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "::notice::DEPLOY_BASE_URL repository variable is not set; skipping."
+            exit 0
+          fi
+          echo "Checking $BASE_URL/health"
+          body=$(curl -sS --max-time 20 --retry 2 "$BASE_URL/health")
+          echo "$body"
+          status=$(printf '%s' "$body" | python3 -c "import sys,json;print(json.load(sys.stdin).get('status',''))")
+          if [ "$status" != "ok" ]; then
+            echo "::error::Health check failed (status=$status)"
+            exit 1
+          fi
+          echo "Health check passed."
