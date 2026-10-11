@@ -27,12 +27,12 @@ FULL_PAYLOAD = {
 
 
 def _staff_headers() -> dict[str, str]:
-    token = create_access_token("staff@massagevip.test", UserRole.STAFF)
+    token = create_access_token("staff@massagevip.sa", UserRole.STAFF)
     return {"Authorization": f"Bearer {token}"}
 
 
 def _viewer_headers() -> dict[str, str]:
-    token = create_access_token("viewer@massagevip.test", UserRole.VIEWER)
+    token = create_access_token("viewer@massagevip.sa", UserRole.VIEWER)
     return {"Authorization": f"Bearer {token}"}
 
 

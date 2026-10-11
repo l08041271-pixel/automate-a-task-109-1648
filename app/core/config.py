@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     secret_key: str = "CHANGE_ME_dev_only_insecure_secret"
     admin_api_key: str = ""
     access_token_expire_minutes: int = 60
+    # bcrypt work factor. 12 in production; tests lower it to stay fast.
+    bcrypt_rounds: int = 12
     cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
 
     # --- Rate limiting -----------------------------------------------------

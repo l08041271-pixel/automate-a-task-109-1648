@@ -21,7 +21,7 @@ alembic==1.14.0               # optional migration tooling
 
 # --- Security ------------------------------------------------------------
 PyJWT==2.10.1
-passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
 
 # --- HTTP clients --------------------------------------------------------
 httpx==0.28.1

@@ -14,6 +14,8 @@ from app.db.session import get_db
 # Shared limiter instances (process-wide).
 general_limiter = FixedWindowLimiter(settings.rate_limit_per_minute)
 webhook_limiter = FixedWindowLimiter(settings.rate_limit_webhook_per_minute)
+# Brute-force protection for the login endpoint (stricter, per client).
+login_limiter = FixedWindowLimiter(10)
 
 
 def client_key(request: Request) -> str:
@@ -34,6 +36,17 @@ def rate_limit(request: Request) -> None:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded. Please slow down.",
+            headers={"Retry-After": str(result.retry_after)},
+        )
+
+
+def rate_limit_login(request: Request) -> None:
+    """Stricter limit for credential endpoints (brute-force mitigation)."""
+    result = login_limiter.check(client_key(request))
+    if not result.allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many login attempts. Try again later.",
             headers={"Retry-After": str(result.retry_after)},
         )
 
@@ -99,5 +112,6 @@ __all__ = [
     "require_writer",
     "require_owner",
     "rate_limit",
+    "rate_limit_login",
     "client_key",
 ]

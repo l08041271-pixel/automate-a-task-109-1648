@@ -19,10 +19,12 @@ os.environ["ADMIN_API_KEY"] = "test-admin-key"
 os.environ["SECRET_KEY"] = "test-secret-key-that-is-definitely-long-enough-1234567890"
 os.environ["RATE_LIMIT_PER_MINUTE"] = "100000"  # avoid flakiness
 os.environ["BUSINESS_CITY"] = "Riyadh"
+os.environ["BCRYPT_ROUNDS"] = "4"  # keep password hashing fast in tests
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app.api import deps  # noqa: E402
 from app.db import models  # noqa: E402
 from app.db.session import engine  # noqa: E402
 from app.main import app  # noqa: E402
@@ -39,6 +41,9 @@ def fresh_db():
     """Recreate all tables for every test so tests are order-independent."""
     models.Base.metadata.drop_all(bind=engine)
     models.Base.metadata.create_all(bind=engine)
+    deps.general_limiter.reset()
+    deps.login_limiter.reset()
+    deps.webhook_limiter.reset()
     yield
 
 

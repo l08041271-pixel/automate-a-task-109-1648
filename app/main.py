@@ -87,10 +87,11 @@ def create_app() -> FastAPI:
         )
 
     # --- Routes -----------------------------------------------------------
-    from app.api.routes import health, leads
+    from app.api.routes import auth, health, leads
 
     app.include_router(health.router)  # /health is unprefixed by design
     app.include_router(leads.router, prefix=settings.api_v1_prefix)
+    app.include_router(auth.router, prefix=settings.api_v1_prefix)
 
     @app.get("/", include_in_schema=False)
     def root() -> dict:
