@@ -94,6 +94,7 @@ def create_app() -> FastAPI:
     auth,
     bookings,
     followups,
+    growth,
     health,
     leads,
     whatsapp,
@@ -106,6 +107,7 @@ def create_app() -> FastAPI:
     app.include_router(bookings.router, prefix=settings.api_v1_prefix)
     app.include_router(followups.router, prefix=settings.api_v1_prefix)
     app.include_router(analytics.router, prefix=settings.api_v1_prefix)
+    app.include_router(growth.router, prefix=settings.api_v1_prefix)
 
     # --- Static, mobile-first CEO dashboard (no build step) -------------
     dashboard_dir = pathlib.Path(__file__).resolve().parents[1] / "static" / "dashboard"
